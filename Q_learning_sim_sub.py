@@ -171,10 +171,10 @@ def evaluate_model(y_true, y_pred):
 if __name__ == "__main__":
     # Load data
     try:
-        df = pd.read_excel("cdrs_1.xlsx")
+        df = pd.read_excel("cdrs_t.xlsx")
         print("Columns in dataset:", df.columns.tolist())
     except FileNotFoundError:
-        print("File not found. Please ensure 'cdrs_1.xlsx' exists in the current directory.")
+        print("File not found. Please ensure 'cdrs_t.xlsx' exists in the current directory.")
         exit()
     
     # Preprocess data
@@ -188,7 +188,13 @@ if __name__ == "__main__":
     n_actions = max(3, n_unique_fraud_types)  # At least 3, but more if needed
     
     # Calculate the number of unique states
-    unique_states = 1000  # Fixed size for state space, can be adjusted
+    #unique_states = 1000  # Fixed size for state space, can be adjusted
+    unique_states = df.apply(lambda row: (
+       int(row['CDR_DURATION_SEC'] * 10),  # duration_state
+       row['CALL_HOUR'],                   # hour_state
+       row['OTHER_PARTY'],                 # other_party_state
+       int(row['CHARGE_FEE_1'] * 10)       # charge_state
+    ), axis=1).drop_duplicates().shape[0]
     
     print(f"Number of unique states: {unique_states}")
     print(f"Number of actions: {n_actions}")
